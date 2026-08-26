@@ -1,0 +1,15 @@
+{
+ "datasets": [
+  "8gaussians",
+  "moons"
+ ],
+ "seeds": [
+  0,
+  1,
+  2
+ ],
+ "train_steps": 6000,
+ "wall_clock_s": 460.45382249999966,
+ "torch": "2.13.0",
+ "device": "cpu"
+}
