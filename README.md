@@ -147,7 +147,7 @@ can only return zero looks identical to one that is working.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install torch numpy scipy matplotlib pandas pytest ruff pillow
+pip install -r requirements.txt
 ```
 
 ```bash
