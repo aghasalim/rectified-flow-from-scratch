@@ -1,0 +1,12 @@
+# CPU is enough for everything in this repo. The 2D experiments are the point,
+# and they train in seconds; there is no CUDA path here to install for.
+torch
+numpy
+scipy
+matplotlib
+pandas
+pillow
+
+# dev
+pytest
+ruff
