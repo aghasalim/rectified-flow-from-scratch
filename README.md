@@ -194,9 +194,9 @@ The papers this is built from, and what each one is actually for:
 
 Sliced Wasserstein as a distance between point clouds follows **Bonneel, Rabin, Peyré, Pfister, Sliced and Radon Wasserstein Barycenters of Measures, JMIV 2015**.
 
-## Conventions
+## Methodology
 
-Shared agent rules are in [`CONVENTIONS.md`](CONVENTIONS.md). The ones that bit
+The rules this follows are in [`METHODOLOGY.md`](METHODOLOGY.md). The ones that bit
 hardest here were "a reference implementation exists before the optimized one",
 "report variance not just the point estimate", and "negative results stay in".
 
