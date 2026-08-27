@@ -1,5 +1,10 @@
 # rectified-flow-from-scratch
 
+[![ci](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml/badge.svg)](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![results](https://img.shields.io/badge/results-reproducible-1a9850.svg)](results/)
+
 Conditional flow matching, rectified flow, and reflow, built from the papers. The
 straightness metric is measured rather than asserted, and it is the number that
 explains everything else in here.
