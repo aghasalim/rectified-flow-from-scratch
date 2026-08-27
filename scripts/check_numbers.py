@@ -19,6 +19,11 @@ def main() -> int:
     nfe = list(csv.DictReader((ROOT / "results" / "nfe-quality.csv").open()))
     st = list(csv.DictReader((ROOT / "results" / "straightness.csv").open()))
     body = (ROOT / "README.md").read_text()
+    # Detail moved out of the README lives in notes/METHODS.md. A figure quoted
+    # there is still a quoted figure and still has to match its source.
+    _methods = ROOT / "notes" / "METHODS.md"
+    if _methods.exists():
+        body += "\n" + _methods.read_text()
 
     claims, failures = [], []
     for ds in ("8gaussians", "moons"):
