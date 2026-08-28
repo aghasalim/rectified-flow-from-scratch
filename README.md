@@ -12,13 +12,6 @@ explains everything else in here.
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
 results table is about eight minutes.
 
-![noise carried to the target distribution](results/animation-8gaussians.gif)
-
-*Each dot is one sample being carried from noise at t=0 to the target at t=1 by
-integrating dx/dt = v(x,t). Left is a diffusion path, middle is plain flow
-matching, right is after one round of reflow. Look at how the right panel moves
-in straight lines while the other two curve.*
-
 ## The one result
 
 All three models reach roughly the same sample quality if you give them enough
@@ -82,6 +75,15 @@ decimal places.
 You can see the same thing without any metric at all, just by plotting the paths:
 
 ![integration paths](results/trajectories-8gaussians.png)
+
+Watching the same paths get drawn makes it plainer still:
+
+![particles carried from noise to the target](results/animation-8gaussians.gif)
+
+*Both panels start from the same noise sample and take the same 56 Euler steps
+on the same target, so the only thing that differs is the field doing the
+carrying: plain flow matching on the left, the same model after one round of
+reflow on the right.*
 
 ## What reflow actually does
 Plain conditional flow matching draws x0 from noise and x1 from data independently.
