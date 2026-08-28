@@ -73,6 +73,16 @@ def evaluate(model, dataset: str, seed: int, n: int = 8192) -> list[dict]:
 def run(dataset: str, seed: int, steps: int, quiet: bool = False) -> dict:
     out: dict = {"dataset": dataset, "seed": seed}
 
+    # Seed BEFORE constructing the network, not only inside train().
+    #
+    # train() calls torch.manual_seed at its start, which is too late: the
+    # weights have already been drawn. PyTorch seeds its global RNG
+    # nondeterministically per process, so the FIRST model built in a run got
+    # different initial weights every time while the later two, built after a
+    # previous train() had already seeded, reproduced exactly. That is precisely
+    # what a re-run showed: diffusion-vp identical to the digit, 1-rectified
+    # drifting from step 0.
+    torch.manual_seed(seed)
     print(f"  [{dataset} seed={seed}] 1-rectified (linear path, independent coupling)")
     m1 = VelocityMLP()
     cfg1 = TrainConfig(dataset=dataset, path="linear", steps=steps, seed=seed)
@@ -81,11 +91,13 @@ def run(dataset: str, seed: int, steps: int, quiet: bool = False) -> dict:
     print(f"  [{dataset} seed={seed}] building reflow coupling from model 1")
     pairs = build_coupling(m1, n=60_000, steps=100, seed=seed + 50)
 
+    torch.manual_seed(seed + 1)
     print(f"  [{dataset} seed={seed}] 2-rectified (retrained on that coupling)")
     m2 = VelocityMLP()
     cfg2 = TrainConfig(dataset=dataset, path="linear", steps=steps, seed=seed)
     train(m2, cfg2, pairs=pairs, quiet=quiet)
 
+    torch.manual_seed(seed + 2)
     print(f"  [{dataset} seed={seed}] diffusion control (VP path)")
     md = VelocityMLP()
     cfgd = TrainConfig(dataset=dataset, path="vp", steps=steps, seed=seed)
