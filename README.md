@@ -29,21 +29,21 @@ compute. Only the reflowed one still works when you give it a single step.
 
 | NFE | diffusion (VP) | 1-rectified (CFM) | 2-rectified (reflow) |
 |---:|---:|---:|---:|
-| 1 | 1.804 | 2.641 | **0.112** |
-| 2 | 0.322 | 0.602 | **0.108** |
-| 4 | 0.168 | 0.251 | **0.104** |
-| 8 | 0.124 | 0.154 | **0.103** |
-| 128 | 0.117 | 0.108 | 0.106 |
+| 1 | 1.796 | 2.639 | **0.117** |
+| 2 | 0.324 | 0.601 | **0.113** |
+| 4 | 0.164 | 0.252 | **0.111** |
+| 8 | 0.116 | 0.159 | **0.110** |
+| 128 | 0.110 | 0.117 | 0.112 |
 
 **two moons**, same protocol:
 
 | NFE | diffusion (VP) | 1-rectified (CFM) | 2-rectified (reflow) |
 |---:|---:|---:|---:|
-| 1 | 0.980 | 1.835 | **0.034** |
-| 2 | 0.403 | 0.776 | **0.033** |
-| 4 | 0.181 | 0.346 | **0.032** |
-| 8 | 0.089 | 0.175 | **0.032** |
-| 128 | 0.031 | 0.031 | 0.031 |
+| 1 | 0.988 | 1.821 | **0.032** |
+| 2 | 0.412 | 0.757 | **0.032** |
+| 4 | 0.184 | 0.343 | **0.032** |
+| 8 | 0.088 | 0.172 | **0.032** |
+| 128 | 0.032 | 0.031 | 0.031 |
 
 The reflowed model at 1 NFE is as good as itself at 128 NFE. On moons that is a
 128x reduction in sampling cost for no measurable loss, and the flat green line
@@ -67,14 +67,14 @@ independent data sample. S is zero exactly when every trajectory is straight.
 | dataset | model | S | path length / straight line |
 |---|---|---:|---:|
 | 8gaussians | diffusion (VP) | 2.934 | 1.048 |
-| 8gaussians | 1-rectified | 2.930 | 1.067 |
-| 8gaussians | 2-rectified | **0.00091** | **1.00005** |
-| moons | diffusion (VP) | 1.012 | 1.255 |
-| moons | 1-rectified | 1.662 | 1.433 |
+| 8gaussians | 1-rectified | 2.927 | 1.066 |
+| 8gaussians | 2-rectified | **0.00099** | **1.00006** |
+| moons | diffusion (VP) | 1.012 | 1.245 |
+| moons | 1-rectified | 1.661 | 1.433 |
 | moons | 2-rectified | **0.00011** | **1.00006** |
 
-Reflow drops S by about 3200x on 8 gaussians and about 15000x on moons. The path
-length ratio goes to 1.00005, which means the trajectories are straight to five
+Reflow drops S by about 3000x on 8 gaussians and about 15000x on moons. The path
+length ratio goes to 1.00006, which means the trajectories are straight to five
 decimal places.
 
 ![straightness](results/straightness.png)
