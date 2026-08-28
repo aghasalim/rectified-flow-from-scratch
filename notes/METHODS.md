@@ -23,7 +23,7 @@ the marginal field.
 This shows up directly in the learned velocity field. The reflowed field barely
 changes with t, which is what straight means:
 
-![learned velocity fields](results/velocity-field-8gaussians.png)
+![learned velocity fields](../results/velocity-field-8gaussians.png)
 
 
 ## The cost
