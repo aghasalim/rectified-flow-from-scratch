@@ -30,11 +30,13 @@ changes with t, which is what straight means:
 
 
 Reflow is not free and the tables above show the price if you look at the last
-row. At 128 NFE on 8 gaussians the reflowed model scores 0.106 against 0.108 for
-the model it was distilled from, so quality is basically unchanged here, but the
-reflowed model can never be better than its teacher because it is trained on its
-teacher's outputs. Any error the first model made is baked into the coupling. On
-a harder dataset that gap would be visible.
+row. At 128 NFE on 8 gaussians the reflowed model scores 0.112 against 0.117 for
+the model it was distilled from, both medians of 3 seeds. The reflowed number is
+the lower of the two, but the seeds run from 0.107 to 0.176 for the reflowed
+model and from 0.110 to 0.181 for its teacher, so that gap is well inside the
+seed spread and the two are level here. It cannot really beat its teacher,
+because it is trained on its teacher's outputs. Any error the first model made is
+baked into the coupling. On a harder dataset that gap would be visible.
 
 The honest summary is that reflow trades a ceiling for a floor. You give up the
 chance of improving with more compute, and in exchange you get most of the
