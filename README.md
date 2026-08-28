@@ -87,15 +87,32 @@ carrying: plain flow matching on the left, the same model after one round of
 reflow on the right.*
 
 ## What reflow actually does
-Plain conditional flow matching draws x0 from noise and x1 from data independently.
+
+Plain conditional flow matching draws x0 from noise and x1 from data
+independently. Each pair gets a straight conditional path, but paths from
+different pairs cross, and at a crossing the model can only learn one velocity,
+so it learns the average of the two. Reflow fixes the coupling instead of the
+model. Integrate the trained model from many noise samples, keep the (x0, x1)
+pairs it produced, retrain on those, and because x0 to x1 is now a function
+nothing crosses and nothing gets averaged away, which is what takes S on 8
+gaussians from 2.927 to 0.00099.
 
 ![learned velocity fields](results/velocity-field-8gaussians.png)
 
 Full detail in [notes/METHODS.md](notes/METHODS.md#what-reflow-actually-does).
+
 ## The cost
-Reflow is not free and the tables above show the price if you look at the last row.
+
+Reflow is not free and the tables above show the price if you look at the last
+row. At 128 NFE on 8 gaussians the reflowed model scores 0.112 against 0.117 for
+the model it was distilled from, both medians of 3 seeds. The reflowed number is
+the lower one, but the seeds run 0.107 to 0.176 for it and 0.110 to 0.181 for
+its teacher, so the two are level rather than one winning. Trained on its own
+teacher's outputs it cannot really pull ahead, and reflow ends up trading a
+ceiling for a floor.
 
 Full detail in [notes/METHODS.md](notes/METHODS.md#the-cost).
+
 ## Training
 
 The objective is a plain regression against the interpolant slope. No ELBO, no
@@ -105,9 +122,19 @@ point:
 ![training curves](results/training-curves.png)
 
 ## What I got wrong
-**The diffusion control ran backwards for a whole experiment.** I wrote `VPPath` using the convention from the diffusion papers, where t=0 is data and t=1 is noise, while `LinearPath` and every sampler in the repo use t=0 for noise.
+
+**The diffusion control ran backwards for a whole experiment.** I wrote `VPPath`
+using the convention from the diffusion papers, where t=0 is data and t=1 is
+noise, while `LinearPath` and every sampler in the repo use t=0 for noise. So the
+model learned a field pointing from data to noise and then got integrated the
+wrong way. Nothing crashed and nothing went NaN, it produced a plausible looking
+blob, and what gave it away was the sliced W2 getting worse with more compute,
+2.43 at 1 NFE against 2.84 at 128 in that broken run. The test I was missing was
+the obvious one, that t=0 is the noise end, and it now runs over every path
+class.
 
 Full detail in [notes/METHODS.md](notes/METHODS.md#what-i-got-wrong).
+
 ## Running it
 
 ```bash
