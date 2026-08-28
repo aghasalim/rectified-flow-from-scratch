@@ -100,50 +100,72 @@ def fig_nfe_quality(out: Path) -> Path:
 def fig_straightness(out: Path) -> Path:
     """The metric that explains the NFE curve.
 
-    The path length ratio is drawn as excess over the straight line in percent,
-    on a log axis. Plotted as a raw ratio, 1.00006 and 1.048 are the same bar
-    and the reader learns nothing.
+    Dots on a log axis, not bars. The values span more than three orders of
+    magnitude, so a linear axis cannot show the small ones at all, and a bar on
+    a log axis is worse: its length is measured from wherever the bottom of the
+    axis happens to fall, so the length means nothing and the eye reads it
+    anyway. A dot carries its value in its position, which is the part a log
+    axis gets right. The sibling schrodinger-bridge repo dropped log bars for
+    the same reason.
+
+    Every number in the titles is read out of the CSV here. A number typed into
+    a string drifts the moment the data is regenerated, and check_numbers.py
+    only reads prose, so it would never catch it.
     """
     table = pd.read_csv(RESULTS / "straightness.csv")
     datasets = [d for d in ("8gaussians", "moons") if d in set(table["dataset"])]
 
+    def median_of(dataset: str, model: str, col: str) -> float:
+        rows = table[(table["dataset"] == dataset) & (table["model"] == model)]
+        return float(rows[col].median())
+
     fig, (left, right) = plt.subplots(1, 2, figsize=(12.4, 4.7))
-    width = 0.25
+    offset = 0.25
     panels = ((left, "straightness_S", lambda v: v, "straightness $S$ (squared data units per unit $t$)"),
               (right, "path_length_ratio_mean", lambda v: (v - 1.0) * 100.0,
                "path length above the straight line (%)"))
     for i, model in enumerate(ORDER):
-        pos = [j + (i - 1) * width for j in range(len(datasets))]
+        pos = [j + (i - 1) * offset for j in range(len(datasets))]
         for axis, col, transform, ylabel in panels:
             vals = [table[(table["dataset"] == d) & (table["model"] == model)][col]
                     for d in datasets]
             med = [transform(float(v.median())) for v in vals]
             err = [[m - transform(float(v.min())) for m, v in zip(med, vals)],
                    [transform(float(v.max())) - m for m, v in zip(med, vals)]]
-            axis.bar(pos, med, width, yerr=err, capsize=4, color=COLOURS[model],
-                     label=LABELS[model], zorder=3)
+            axis.errorbar(pos, med, yerr=err, fmt="o", markersize=8, capsize=4,
+                          linestyle="none", color=COLOURS[model], label=LABELS[model],
+                          zorder=3)
             axis.set_ylabel(ylabel)
             for x, m in zip(pos, med):
                 axis.text(x, m * 1.55, f"{m:.3g}", ha="center", va="bottom",
                           fontsize=8, color="#444444", zorder=4)
 
-    for axis in (left, right):
+    for axis, col, transform, _ in panels:
+        seen = [transform(float(v)) for v in table[col]]
         axis.set_yscale("log")
         axis.set_xticks(range(len(datasets)))
         axis.set_xticklabels([PRETTY[d] for d in datasets])
         axis.grid(False, axis="x")
         axis.grid(alpha=0.5, axis="y", which="major")
         axis.set_xlim(-0.6, len(datasets) - 0.4)
-        heights = [p.get_height() for p in axis.patches]
-        axis.set_ylim(min(heights) / 6, max(heights) * 12)
+        axis.set_ylim(min(seen) / 3, max(seen) * 8)
 
-    titled(left, "Reflow cuts the curvature metric by 3000x or more",
+    # The smallest drop across the datasets, so "or more" is true of both.
+    factor = min(median_of(d, "1-rectified", "straightness_S")
+                 / median_of(d, "2-rectified", "straightness_S") for d in datasets)
+    quoted = "8gaussians" if "8gaussians" in datasets else datasets[0]
+    excess = {m: (median_of(quoted, m, "path_length_ratio_mean") - 1.0) * 100.0
+              for m in ("2-rectified", "diffusion-vp")}
+
+    titled(left, f"Reflow cuts the curvature metric by {factor:.0f}x or more",
            "$S=\\mathbb{E}\\int_0^1\\|(x_1-x_0)-v(x_t,t)\\|^2dt$, zero means every path is a line")
     titled(right, "The reflowed paths are straight to five decimals",
-           "0.006% longer than the straight line, against 4.9% for the diffusion control")
+           f"on {PRETTY[quoted]}, {excess['2-rectified']:.3g}% longer than the straight line, "
+           f"against {excess['diffusion-vp']:.3g}% for the diffusion control")
     handles, labels = left.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.09))
-    fig.text(0.0, -0.115, "bars are the median of 3 seeds, whiskers span min to max",
+    fig.text(0.0, -0.115, "dots are the median of 3 seeds, whiskers span min to max. "
+             "Log axis, so a dot's height is the value and no length on the panel is.",
              fontsize=9.3, color="#5a5a5a")
     fig.tight_layout()
     fig.savefig(out)
@@ -374,17 +396,17 @@ def anim_straightening(dataset: str, out: Path, seed: int = 0, n: int = 260,
 
 def main() -> None:
     RESULTS.mkdir(exist_ok=True)
+    # Only the figures some markdown in the repo actually shows. The moons
+    # versions of the trajectory and field panels made the same point a second
+    # time, nothing linked them, and they cost 1.3 MB in the tree.
     made = [
         fig_nfe_quality(RESULTS / "nfe-quality.png"),
         fig_straightness(RESULTS / "straightness.png"),
         fig_training_curves(RESULTS / "training-curves.png"),
         anim_straightening("8gaussians", RESULTS / "animation-8gaussians.gif"),
+        fig_trajectories("8gaussians", RESULTS / "trajectories-8gaussians.png"),
+        fig_velocity_field("8gaussians", RESULTS / "velocity-field-8gaussians.png"),
     ]
-    for ds in ("8gaussians", "moons"):
-        made += [
-            fig_trajectories(ds, RESULTS / f"trajectories-{ds}.png"),
-            fig_velocity_field(ds, RESULTS / f"velocity-field-{ds}.png"),
-        ]
     for p in made:
         if p.exists():
             print(f"-> {p.relative_to(REPO)}  ({p.stat().st_size // 1024} KB)")
