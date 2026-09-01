@@ -1,0 +1,23 @@
+{
+ "dataset": "8gaussians",
+ "seed": 0,
+ "steps": 100,
+ "n_straightness": 4096,
+ "n_eval": 8192,
+ "models": {
+  "2-rectified": {
+   "straightness_S": 0.0012116235448047519,
+   "path_length_ratio_mean": 1.000069499015808,
+   "path_length_ratio_p90": 1.0001246929168701,
+   "sliced_w2_euler_nfe1": 0.11044326424598694,
+   "straightness_S_median_over_seeds": 0.0009874023962765932
+  },
+  "diffusion-vp": {
+   "straightness_S": 2.945051908493042,
+   "path_length_ratio_mean": 1.0486910343170166,
+   "path_length_ratio_p90": 1.1192468404769897,
+   "sliced_w2_euler_nfe1": 1.8062999248504639,
+   "straightness_S_median_over_seeds": 2.9335196018218994
+  }
+ }
+}
