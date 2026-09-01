@@ -27,3 +27,42 @@ jobs:
       # edited, so this runs on every push.
       - name: Check quoted numbers against results/
         run: python scripts/check_numbers.py
+
+  # Everything the README publishes, recomputed by implementations that share no
+  # code with the Python. See verify/verify.sh.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Toolchains
+        run: |
+          command -v Rscript || sudo apt-get install -y --no-install-recommends r-base-core
+          sqlite3 --version
+          cc --version | head -1
+          go version
+          cargo --version
+          java -version
+      - name: Recompute in every other language
+        run: ./verify/verify.sh
+      # A check that cannot fail is checking nothing, so corrupt a results file
+      # and require rejection, then restore it and require a pass.
+      - name: The checks have to be able to fail
+        run: |
+          set -e
+          cp results/nfe-quality.csv /tmp/nfe-quality.csv
+          grep -q 0.11158174276351929 results/nfe-quality.csv
+          sed -i s/0.11158174276351929/0.90000000000000000/ results/nfe-quality.csv
+          if VERIFY_ONLY="median tables" ./verify/verify.sh; then
+            echo "a corrupted results/nfe-quality.csv was accepted"; exit 1
+          fi
+          cp /tmp/nfe-quality.csv results/nfe-quality.csv
+          VERIFY_ONLY="median tables" ./verify/verify.sh
+
+          cp results/straightness.csv /tmp/straightness.csv
+          grep -q 2.945051908493042 results/straightness.csv
+          sed -i s/2.945051908493042/2.955051908493042/ results/straightness.csv
+          if VERIFY_ONLY="C, velocity" ./verify/verify.sh; then
+            echo "a corrupted results/straightness.csv was accepted"; exit 1
+          fi
+          cp /tmp/straightness.csv results/straightness.csv
+          VERIFY_ONLY="C, velocity" ./verify/verify.sh
