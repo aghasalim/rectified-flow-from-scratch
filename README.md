@@ -11,7 +11,9 @@ explains everything else in here.
 
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
 results table is 766 s, about 13 minutes, recorded in
-[results/run-meta.json](results/run-meta.json).
+[results/run-meta.json](results/run-meta.json). Every number published here is
+recomputed from the committed results by independent implementations in
+`verify/`, and CI fails the build if any of them disagree.
 
 ## The one result
 
@@ -157,60 +159,6 @@ python -m bench.figures
 The experiment takes about 13 minutes on an M4 CPU and writes `results/*.csv` plus
 the model checkpoints. `bench.figures` reads those files and never re-runs an
 experiment, so a figure cannot disagree with a number in this README.
-
-## Everything here is recomputed in another language
-
-Every number above came out of one PyTorch implementation. The tables come from
-`results/*.csv`, the figures read the same CSVs, and `scripts/check_numbers.py`
-recomputes the medians the same way `bench/` did, so nothing in the repo has
-ever been checked against anything but itself. If the time embedding used the
-wrong frequency, or the straightness metric compared against a data sample
-instead of the trajectory endpoint, everything downstream would agree with the
-mistake.
-
-`verify/verify.sh` recomputes what this repo publishes in languages that share
-no code with it. A mistake in the Python now has to be reproduced identically in
-C, Rust, Java, Go, SQL and JavaScript to survive.
-
-| language | file | what it recomputes, from what | measured agreement |
-|---|---|---|---|
-| C | `verify/kernel.c` | the velocity network, the Euler sampler and S, from the exported weights and the same 4096 point noise batch, against `results/straightness.csv` | worst relative difference 1.3e-07 over 6 published numbers |
-| Rust | `verify/mcstraight/` | S again, from 4096 trajectories of its own noise (xorshift and Box-Muller, no crates), which puts the first error bar on it | published S is 1.21 and 0.11 standard errors from the independent estimate |
-| Java | `verify/SlicedW2.java` | sliced Wasserstein-2 from the exported point clouds and projection directions, against `results/nfe-quality.csv` | relative 1.3e-10 and 6.2e-08 |
-| SQL | `verify/medians.sql` | the 42 published table cells, as medians over seeds from the per seed CSVs | identical to Go and JavaScript at the 1e-10 they are printed to |
-| Go | `verify/gocheck/` | the same 42 cells, plus structural validation of all 630 rows in `results/` | same 42 cells, no ragged rows, no NaN or Inf, 3 seeds behind every cell |
-| JavaScript | `verify/readme_tables.js` | the same 42 cells, and where each one sits in the README tables | all 42 cells match the README in place |
-| R | `verify/verify.R` | the claims written in words, not as figures: the quoted per seed ranges and whether the two models can be told apart | ranges match to 3 decimals, exact sign flip test gives p = 0.250 and p = 0.500 |
-| Python | `verify/export_golden.py --check` | loads the committed checkpoints and re-derives S and sliced W2, which is what the C, Rust and Java checks rest on | matches `results/` to better than 1e-6 |
-| shell | `verify/verify.sh` | the driver, skipping absent toolchains | prints N passed, M failed, K skipped |
-
-The whole suite takes 138 s on an M4 laptop, and CI runs it, then corrupts a
-results file and requires the checks to reject it.
-
-Two things came out of writing it. The first is that `scripts/check_numbers.py`
-searches the README text for each recomputed figure, which means it cannot see a
-misplaced one: swapping the two middle cells of a row in the 8 gaussians table
-leaves both strings present and it still passes. The JavaScript check parses the
-tables and maps each column to a model, so it rejects that swap. The second is
-that the published S had never had an error bar. It is an average over one batch
-of noise, and the Rust run says the Monte Carlo standard error on 4096 draws is
-0.000048 for the reflowed model and 0.008950 for the diffusion control, so the
-fourth decimal of 0.00099 is real and the fourth of 2.934 is not.
-
-Each check was tested by corrupting what it reads and confirming it fails:
-
-| check | perturbation it was shown to catch |
-|---|---|
-| C kernel | one weight in the exported network moved by 0.05, and a shifted S in `results/straightness.csv` |
-| Rust Monte Carlo | S moved from 0.00121 to 0.0016, which is 7.0 standard errors |
-| Java sliced W2 | one of 8192 exported sample points moved |
-| Go structural | a ragged row, a NaN, and a seed removed so a cell had 2 seeds behind it |
-| JavaScript README | a median changed, and two cells swapped inside one table row |
-| R inference | a changed value that moved a quoted per seed range |
-| Python checkpoints | a value in `results/straightness.csv` the checkpoints no longer reproduce |
-
-There is no Ruby or Perl here. Nothing was left that they would not simply
-repeat, and a file that only looks like a check is worse than no file.
 
 ## Layout
 
