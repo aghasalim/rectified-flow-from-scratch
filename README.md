@@ -124,6 +124,9 @@ point:
 
 ![training curves](results/training-curves.png)
 
+The run that drew them, every setting and seed with the line that set it, is
+the last entry in [notes/LOGBOOK.md](notes/LOGBOOK.md).
+
 ## What I got wrong
 
 **The diffusion control ran backwards for a whole experiment.** I wrote `VPPath`
