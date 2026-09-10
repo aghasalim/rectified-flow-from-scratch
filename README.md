@@ -1,4 +1,4 @@
-# rectified-flow-from-scratch
+# One Euler step, if you straighten the paths first
 
 [![ci](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml/badge.svg)](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml)
 [![python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
@@ -11,9 +11,10 @@ explains everything else in here.
 
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
 results table is 766 s, about 13 minutes, recorded in
-[results/run-meta.json](results/run-meta.json). Every number published here is
-recomputed from the committed results by independent implementations in
-`verify/`, and CI fails the build if any of them disagree.
+[results/run-meta.json](results/run-meta.json). Every figure quoted below has a
+second provenance: `verify/` rebuilds it from the committed CSVs in C, Java,
+Rust, Go, SQL, R and JavaScript, none of which can see the Python that produced
+it. A build where the two provenances disagree does not go green.
 
 ## The one result
 
@@ -135,7 +136,8 @@ blob, and what gave it away was the sliced W2 getting worse with more compute,
 the obvious one, that t=0 is the noise end, and it now runs over every path
 class.
 
-Full detail in [notes/METHODS.md](notes/METHODS.md#what-i-got-wrong).
+The full post-mortem, including how long it took me to notice, is at
+[notes/METHODS.md](notes/METHODS.md#what-i-got-wrong).
 
 ## Running it
 
@@ -191,25 +193,12 @@ Sliced Wasserstein as a distance between point clouds follows **Bonneel, Rabin, 
 
 ## Methodology
 
-The rules this follows are in [`METHODOLOGY.md`](METHODOLOGY.md). The ones that bit
-hardest here were "a reference implementation exists before the optimized one",
-"report variance not just the point estimate", and "negative results stay in".
-
-## Author
-
-Aghasalim Mustafazada, third year AI student at Howest, Belgium.
-
-<p align="center">
-  <a href="https://github.com/aghasalim">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="github"></a>
-  <a href="https://www.kaggle.com/aghasalimmustafazada">
-    <img src="https://img.shields.io/badge/Kaggle-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white" alt="kaggle"></a>
-  <a href="https://linkedin.com/in/mustafazada">
-    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="linkedin"></a>
-  <a href="https://orcid.org/0009-0001-8746-4582">
-    <img src="https://img.shields.io/badge/ORCID-A6CE39?style=for-the-badge&logo=orcid&logoColor=white" alt="orcid"></a>
-</p>
+Three entries in [`METHODOLOGY.md`](METHODOLOGY.md) earned their keep on this
+project in particular. Build the legible version first, or the VP control runs
+backwards for a week with nothing around to contradict it. Publish the seed
+spread, or the last row of the NFE table reads as a win when it is a tie. Leave
+the negative results in, or the section on what reflow costs never gets written.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+Released under MIT; see [LICENSE](LICENSE).
