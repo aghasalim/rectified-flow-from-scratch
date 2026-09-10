@@ -10,9 +10,9 @@ rectified flow produces straight trajectories. The velocity a trained model
 learns is the conditional expectation of that target given (x_t, t), and the
 averaging over crossing pairs is what puts curvature back in.
 
-The VP (variance preserving) path is here for the comparison in task 06. It is
-the path a DDPM implicitly uses, and its target velocity is not constant, which
-is the point being demonstrated.
+The VP (variance preserving) path is here for the comparison against the linear
+path. It is the path a DDPM implicitly uses, and its target velocity is not
+constant, which is the point being demonstrated.
 """
 from __future__ import annotations
 
