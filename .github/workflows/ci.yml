@@ -44,7 +44,7 @@ jobs:
           java -version
       - name: Recompute in every other language
         run: ./verify/verify.sh
-      # A check that cannot fail is checking nothing, so corrupt a results file
+      # A check that cannot fail is not a check, so corrupt a results file
       # and require rejection, then restore it and require a pass.
       - name: The checks have to be able to fail
         run: |
