@@ -1,5 +1,10 @@
 # Logbook
 
+## 2026-09-13, the per-model wall clock was measured and then thrown away
+**Tried:** `train()` appended each model's wall clock to its history, and `bench/experiment.py` skipped that row when writing `training-curves.csv`, so only the run total survived. Fixed the skip so the row goes to `training-times.csv`, then re-ran the published command on the same M4 with the same torch 2.13.0 to get real numbers rather than leaving a column of blanks.
+**Measured:** the re-run reproduced the published results exactly. All six checkpoints are byte-identical to the committed ones, every one of the 234 loss values matches, every straightness value matches, and every one of the 144 sliced W2 numbers matches to the last digit. Only the clocks moved. The eighteen trainings took 235 s between them, 12.2 to 14.7 s each; by model, 1-rectified 13.2 s, 2-rectified 13.2 s, diffusion-vp 12.6 s on average. The whole run took 471 s against the 766 s recorded in August.
+**Concluded:** the three trainings cost about the same, so the 766 s was never mostly training; the coupling for reflow, the straightness integrals and the sampling sweep are where the rest goes. The run being 295 s faster on the same machine with identical outputs says the August total measured the machine's state that day as much as the code, which is the argument for recording per-model time in the first place: a total is one number and cannot tell you which part of it is yours. `results/` is now one run, this one, with the timings kept.
+
 ## 2026-08-26, the diffusion control ran backwards and I nearly shipped it
 **Tried:** trained three models per dataset (1-rectified, 2-rectified, VP-path diffusion control) and looked at the first seed before letting the full sweep run.
 **Measured:** the control scored sliced W2 of 2.4312 at 1 NFE and 2.8353 at 128. Quality got *worse* with 50x more compute.

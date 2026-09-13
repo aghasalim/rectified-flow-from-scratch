@@ -138,11 +138,15 @@ def main() -> int:
         for seed in args.seeds:
             everything.append(run(ds, seed, args.steps, quiet=True))
 
-    nfe_rows, str_rows, curve_rows = [], [], []
+    nfe_rows, str_rows, curve_rows, time_rows = [], [], [], []
     for e in everything:
         for model, hist in e.get("curves", {}).items():
             for h in hist:
                 if h["step"] == "wall_clock_s":
+                    # train() appends the per-model wall clock as the last history
+                    # row. It used to be skipped here, which left only the run total.
+                    time_rows.append({"dataset": e["dataset"], "seed": e["seed"],
+                                      "model": model, "wall_clock_s": h["loss"]})
                     continue
                 curve_rows.append({"dataset": e["dataset"], "seed": e["seed"],
                                    "model": model, "step": h["step"], "loss": h["loss"]})
@@ -154,7 +158,7 @@ def main() -> int:
                              "model": model, **payload["straightness"]})
 
     for name, rows in (("nfe-quality", nfe_rows), ("straightness", str_rows),
-                       ("training-curves", curve_rows)):
+                       ("training-curves", curve_rows), ("training-times", time_rows)):
         if not rows:
             continue
         p = RESULTS / f"{name}.csv"

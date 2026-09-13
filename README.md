@@ -10,7 +10,7 @@ straightness metric is measured rather than asserted, and it is the number that
 explains everything else in here.
 
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
-results table is 766 s, about 13 minutes, recorded in
+results table is 471 s, about 8 minutes, recorded in
 [results/run-meta.json](results/run-meta.json). Every figure quoted below has a
 second provenance: `verify/` rebuilds it from the committed CSVs in C, Java,
 Rust, Go, SQL, R and JavaScript, none of which can see the Python that produced
@@ -161,7 +161,7 @@ python -m bench.experiment --datasets 8gaussians moons --seeds 0 1 2 --steps 600
 python -m bench.figures
 ```
 
-The experiment takes about 13 minutes on an M4 CPU and writes `results/*.csv` plus
+The experiment takes about 8 minutes on an M4 CPU and writes `results/*.csv` plus
 the model checkpoints. `bench.figures` reads those files and never re-runs an
 experiment, so a figure cannot disagree with a number in this README.
 

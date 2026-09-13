@@ -9,7 +9,7 @@
   2
  ],
  "train_steps": 6000,
- "wall_clock_s": 766.0118566669998,
+ "wall_clock_s": 471.28018062499905,
  "torch": "2.13.0",
  "device": "cpu"
 }
