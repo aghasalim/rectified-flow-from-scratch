@@ -5,8 +5,7 @@
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![results](https://img.shields.io/badge/results-reproducible-1a9850.svg)](results/)
 
-Conditional flow matching, rectified flow, and reflow, built from the papers. The
-straightness metric is measured instead of asserted, and it is the number that
+Conditional flow matching, rectified flow, and reflow, built from the papers. The straightness metric is measured, and it is the number that
 explains everything else in here.
 
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
@@ -94,8 +93,7 @@ reflow on the right.*
 Plain conditional flow matching draws x0 from noise and x1 from data
 independently. Each pair gets a straight conditional path, but paths from
 different pairs cross, and at a crossing the model can only learn one velocity,
-so it learns the average of the two. Reflow fixes the coupling instead of the
-model. Integrate the trained model from many noise samples, keep the (x0, x1)
+so it learns the average of the two. Reflow fixes the coupling, not the model. Integrate the trained model from many noise samples, keep the (x0, x1)
 pairs it produced, retrain on those, and because x0 to x1 is now a function
 nothing crosses and nothing gets averaged away, which is what takes S on 8
 gaussians from 2.927 to 0.00099.
@@ -110,7 +108,7 @@ Reflow is not free and the tables above show the price if you look at the last
 row. At 128 NFE on 8 gaussians the reflowed model scores 0.112 against 0.117 for
 the model it was distilled from, both medians of 3 seeds. The reflowed number is
 the lower one, but the seeds run 0.107 to 0.176 for it and 0.110 to 0.181 for
-its teacher, so the two are level instead of one winning. Trained on its own
+its teacher, so the two are level. Trained on its own
 teacher's outputs it cannot really pull ahead, and reflow ends up trading a
 ceiling for a floor.
 
@@ -188,7 +186,7 @@ The papers this is built from, and what each one is actually for:
 - **Lipman, Chen, Ben-Hamu, Nickel, Le. Flow Matching for Generative Modeling. ICLR 2023.** [arXiv:2210.02747](https://arxiv.org/abs/2210.02747) The conditional flow matching objective, and the argument that you can regress against a conditional path and still get the right marginal field.
 - **Liu, Gong, Liu. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow. ICLR 2023.** [arXiv:2209.03003](https://arxiv.org/abs/2209.03003) Rectified flow and the reflow procedure. The crossing-paths argument in the section above is theirs.
 - **Albergo, Vanden-Eijnden. Building Normalizing Flows with Stochastic Interpolants. ICLR 2023.** [arXiv:2209.15571](https://arxiv.org/abs/2209.15571) The interpolant framing that makes diffusion and flow matching two choices of the same object.
-- **Tong et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport. TMLR 2024.** [arXiv:2302.00482](https://arxiv.org/abs/2302.00482) Minibatch OT coupling, which attacks the same crossing problem reflow does but during training instead of after.
+- **Tong et al. Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport. TMLR 2024.** [arXiv:2302.00482](https://arxiv.org/abs/2302.00482) Minibatch OT coupling, which attacks the same crossing problem reflow does but during training; reflow does it afterwards.
 - **Ho, Jain, Abbeel. Denoising Diffusion Probabilistic Models. NeurIPS 2020.** [arXiv:2006.11239](https://arxiv.org/abs/2006.11239) The VP path used as the control arm here.
 - **Song, Sohl-Dickstein, Kingma, Kumar, Ermon, Poole. Score-Based Generative Modeling through SDEs. ICLR 2021.** [arXiv:2011.13456](https://arxiv.org/abs/2011.13456) The probability flow ODE, which is why a diffusion model can be sampled with the same ODE solvers used here.
 
