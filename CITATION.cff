@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: If you use this work, please cite it as below.
 title: "Rectified Flow from scratch"
-abstract: "Conditional flow matching, rectified flow and reflow, with the straightness metric measured rather than asserted."
+abstract: "Conditional flow matching, rectified flow and reflow, with the straightness of the learned paths measured directly."
 type: software
 authors:
   - family-names: Mustafazada
