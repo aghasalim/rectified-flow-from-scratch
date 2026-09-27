@@ -6,7 +6,7 @@
 [![results](https://img.shields.io/badge/results-reproducible-1a9850.svg)](results/)
 
 Conditional flow matching, rectified flow, and reflow, built from the papers. The
-straightness metric is measured rather than asserted, and it is the number that
+straightness metric is measured instead of asserted, and it is the number that
 explains everything else in here.
 
 Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
@@ -110,7 +110,7 @@ Reflow is not free and the tables above show the price if you look at the last
 row. At 128 NFE on 8 gaussians the reflowed model scores 0.112 against 0.117 for
 the model it was distilled from, both medians of 3 seeds. The reflowed number is
 the lower one, but the seeds run 0.107 to 0.176 for it and 0.110 to 0.181 for
-its teacher, so the two are level rather than one winning. Trained on its own
+its teacher, so the two are level instead of one winning. Trained on its own
 teacher's outputs it cannot really pull ahead, and reflow ends up trading a
 ceiling for a floor.
 
@@ -129,7 +129,7 @@ the last entry in [notes/LOGBOOK.md](notes/LOGBOOK.md).
 
 ## What I got wrong
 
-**The diffusion control ran backwards for a whole experiment.** I wrote `VPPath`
+The diffusion control ran backwards for a whole experiment. I wrote `VPPath`
 using the convention from the diffusion papers, where t=0 is data and t=1 is
 noise, while `LinearPath` and every sampler in the repo use t=0 for noise. So the
 model learned a field pointing from data to noise and then got integrated the
