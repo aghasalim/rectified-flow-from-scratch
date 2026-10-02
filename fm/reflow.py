@@ -20,7 +20,7 @@ from .toys import sample_noise
 
 @torch.no_grad()
 def build_coupling(model, n: int = 60_000, steps: int = 100, batch: int = 4096, seed: int = 7):
-    """Integrate the model accurately and return (N, 2, D) pairs."""
+    """Integrate the model accurately and return (N, 2, 2) pairs: [:, 0] is the noise x0, [:, 1] its endpoint."""
     out = []
     remaining = n
     torch.manual_seed(seed)
