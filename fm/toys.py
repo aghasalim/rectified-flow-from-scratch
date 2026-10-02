@@ -11,7 +11,7 @@ import math
 import torch
 
 
-def eight_gaussians(n: int, g: torch.Generator, scale: float = 4.0, std: float = 0.25):
+def eight_gaussians(n: int, g: torch.Generator, scale: float = 4.0, std: float = 0.25) -> torch.Tensor:
     centres = torch.tensor(
         [(math.cos(2 * math.pi * i / 8), math.sin(2 * math.pi * i / 8)) for i in range(8)]
     ) * scale
@@ -19,7 +19,7 @@ def eight_gaussians(n: int, g: torch.Generator, scale: float = 4.0, std: float =
     return centres[idx] + std * torch.randn(n, 2, generator=g)
 
 
-def two_moons(n: int, g: torch.Generator, noise: float = 0.1):
+def two_moons(n: int, g: torch.Generator, noise: float = 0.1) -> torch.Tensor:
     half = n // 2
     a = math.pi * torch.rand(half, generator=g)
     outer = torch.stack([torch.cos(a) * 3, torch.sin(a) * 3], dim=1)
@@ -28,7 +28,7 @@ def two_moons(n: int, g: torch.Generator, noise: float = 0.1):
     return torch.cat([outer, inner]) + noise * torch.randn(n, 2, generator=g) * 3
 
 
-def spiral(n: int, g: torch.Generator, noise: float = 0.08):
+def spiral(n: int, g: torch.Generator, noise: float = 0.08) -> torch.Tensor:
     t = torch.rand(n, generator=g) ** 0.5 * 3.5 * math.pi
     r = t * 0.45
     pts = torch.stack([r * torch.cos(t), r * torch.sin(t)], dim=1)
@@ -36,7 +36,7 @@ def spiral(n: int, g: torch.Generator, noise: float = 0.08):
     return pts * sign + noise * torch.randn(n, 2, generator=g) * 3
 
 
-def checkerboard(n: int, g: torch.Generator):
+def checkerboard(n: int, g: torch.Generator) -> torch.Tensor:
     x = torch.rand(n, generator=g) * 8 - 4
     y = torch.rand(n, generator=g) - torch.randint(0, 2, (n,), generator=g).float() * 2
     y = y + torch.floor(x) % 2
