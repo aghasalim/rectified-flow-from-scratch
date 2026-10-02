@@ -39,7 +39,7 @@ class TrainConfig:
     history: list = field(default_factory=list)
 
 
-def train(model: nn.Module, cfg: TrainConfig, pairs: torch.Tensor | None = None, quiet=False):
+def train(model: nn.Module, cfg: TrainConfig, pairs: torch.Tensor | None = None, quiet: bool = False) -> nn.Module:
     """Train v_theta. If `pairs` is given it is an (N, 2, D) tensor of coupled
     (x0, x1); otherwise pairs are drawn independently each step."""
     torch.manual_seed(cfg.seed)
