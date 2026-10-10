@@ -33,3 +33,8 @@
 **Tried:** swapped two cells in the 128 NFE row of the 8 gaussians table and ran `scripts/check_numbers.py`.
 **Measured:** it still said "no drift", because it only searched for each value anywhere in the README and both values appear in other rows.
 **Concluded:** a check that cannot see a swapped cell is weaker than it looks. It now parses the two W2 tables and the straightness table and compares each cell with the median from `results/`, and it fails if a result has no cell. `tests/test_check_numbers.py` swaps cells and requires a failure. No numbers changed.
+
+## 2026-10-11, sliced W2 for unequal sample counts
+**Tried:** called `sliced_w2` on a sample and four stacked copies of the same sample.
+**Measured:** a clearly non-zero distance for two copies of one distribution. It cut both sorted projections to the shorter length, so the smaller sample was compared with only the lowest quarter of the longer one.
+**Concluded:** every run in `results/` compares 8192 points with 8192, so none of them hit this, and `verify/export_golden.py --check` still reproduces them. Equal counts keep the exact point for point match; unequal counts now go through the shared quantile grid from latent-diffusion-from-scratch. A test covers it. No numbers changed.

@@ -149,3 +149,13 @@ def test_data_is_seeded():
 
 def test_noise_is_seeded():
     assert torch.equal(sample_noise(50, 2, seed=1), sample_noise(50, 2, seed=1))
+
+
+# --- metric ----------------------------------------------------------------
+def test_sliced_w2_handles_unequal_sample_counts():
+    from bench.experiment import sliced_w2
+    a = torch.randn(1000, 2, generator=torch.Generator().manual_seed(0))
+    # four copies of a is the same distribution, so the distance has to be ~0,
+    # not the gap between a and the lowest quarter of the longer sample
+    assert sliced_w2(a, torch.cat([a, a, a, a])) < 0.02
+    assert sliced_w2(a, a) == 0.0

@@ -36,16 +36,33 @@ RESULTS = REPO / "results"
 NFE_GRID = [1, 2, 4, 8, 16, 32, 64, 128]
 
 
-def sliced_w2(a: torch.Tensor, b: torch.Tensor, n_proj: int = 256, seed: int = 0) -> float:
-    """Sliced 2-Wasserstein. Exact per projection, averaged over directions."""
+def sliced_w2(a: torch.Tensor, b: torch.Tensor, n_proj: int = 256, seed: int = 0,
+              n_quantiles: int = 256) -> float:
+    """Sliced 2-Wasserstein, averaged over directions.
+
+    Equal sample counts are matched point for point, which is exact per
+    projection and is what every run in results/ uses. Unequal counts are
+    compared on a shared quantile grid, as in latent-diffusion-from-scratch.
+    Cutting both to the shorter one would compare the smaller sample with only
+    the lower part of the larger one.
+    """
     g = torch.Generator().manual_seed(seed)
     d = a.shape[1]
     dirs = torch.randn(n_proj, d, generator=g)
     dirs = dirs / dirs.norm(dim=1, keepdim=True)
     pa = (a @ dirs.T).sort(dim=0).values
     pb = (b @ dirs.T).sort(dim=0).values
-    n = min(pa.shape[0], pb.shape[0])
-    return ((pa[:n] - pb[:n]) ** 2).mean().sqrt().item()
+    if pa.shape[0] == pb.shape[0]:
+        return ((pa - pb) ** 2).mean().sqrt().item()
+    q = torch.linspace(0, 1, n_quantiles)
+
+    def grab(p):
+        idx = q * (p.shape[0] - 1)
+        lo, hi = idx.floor().long(), idx.ceil().long()
+        w = (idx - lo.float()).unsqueeze(1)
+        return p[lo] * (1 - w) + p[hi] * w
+
+    return ((grab(pa) - grab(pb)) ** 2).mean().sqrt().item()
 
 
 def evaluate(model, dataset: str, seed: int, n: int = 8192) -> list[dict]:
