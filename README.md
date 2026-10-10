@@ -6,20 +6,21 @@
 [![results](https://img.shields.io/badge/results-reproducible-1a9850.svg)](results/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23003668.svg)](https://doi.org/10.5281/zenodo.23003668)
 
-Conditional flow matching, rectified flow, and reflow, built from the papers. The straightness metric is measured, and it is the number that
-explains everything else in here.
+I built conditional flow matching, rectified flow and reflow from the papers. I
+also measured how straight the sampling paths are, and that number ended up
+explaining most of what I saw.
 
-Everything below ran on a laptop CPU (Apple M4). Total compute for the whole
-results table is 471 s, about 8 minutes, recorded in
-[results/run-meta.json](results/run-meta.json). Every figure quoted below has a
-second provenance: `verify/` rebuilds it from the committed CSVs in C, Java,
-Rust, Go, SQL, R and JavaScript, none of which can see the Python that produced
-it. A build where the two provenances disagree does not go green.
+Everything below ran on my laptop CPU (Apple M4). The whole results table took
+471 s of compute, about 8 minutes, which I logged in
+[results/run-meta.json](results/run-meta.json). I also rebuild every number from
+the committed CSVs in `verify/`, using C, Java, Rust, Go, SQL, R and JavaScript.
+None of those can see the Python that made the numbers, and the build only goes
+green when they all agree.
 
 ## The one result
 
-All three models reach roughly the same sample quality if you give them enough
-compute. Only the reflowed one still works when you give it a single step.
+With enough compute, all three models end up with about the same sample
+quality. The reflowed one is the only one that still works with a single step.
 
 **8 gaussians**, sliced Wasserstein-2 to the target (lower is better), median of
 3 seeds, Euler sampler:
@@ -42,24 +43,24 @@ compute. Only the reflowed one still works when you give it a single step.
 | 8 | 0.088 | 0.172 | **0.032** |
 | 128 | 0.032 | 0.031 | 0.031 |
 
-The reflowed model at 1 NFE is as good as itself at 128 NFE. On moons that is a
-128x reduction in sampling cost for no measurable loss, and the flat green line
-below is what that looks like.
+At 1 NFE the reflowed model does as well as it does at 128 NFE. On moons that
+cuts sampling cost by 128x with no loss I could measure. It's the flat green
+line in the plot below.
 
 ![sample quality against NFE](results/nfe-quality.png)
 
 ## Why it works, measured
 
-The reason is straightness. If a trajectory is a straight line then one Euler
-step integrates it exactly, because the velocity never changes along the path.
-If it curves, one step cuts the corner and you land somewhere wrong.
+It comes down to how straight the paths are. If a trajectory is a straight line,
+one Euler step integrates it exactly, since the velocity stays the same along the
+path. If it curves, one step cuts the corner and lands in the wrong place.
 
-The metric is
+I measure straightness with
 
     S = E integral from 0 to 1 of || (x1 - x0) - v(x_t, t) ||^2 dt
 
-where x1 is the endpoint the model's own ODE actually reaches, not an
-independent data sample. S is zero exactly when every trajectory is straight.
+where x1 is the endpoint the model's own ODE reaches. I don't use an independent
+data sample there. S is zero only when every trajectory is straight.
 
 | dataset | model | S | path length / straight line |
 |---|---|---:|---:|
@@ -70,33 +71,34 @@ independent data sample. S is zero exactly when every trajectory is straight.
 | moons | 1-rectified | 1.661 | 1.433 |
 | moons | 2-rectified | **0.00011** | **1.00006** |
 
-Reflow drops S by about 3000x on 8 gaussians and about 15000x on moons. The path
-length ratio goes to 1.00006, which means the trajectories are straight to five
-decimal places.
+Reflow lowers S by about 3000x on 8 gaussians and about 15000x on moons. The path
+length ratio goes to 1.00006, so the trajectories are straight to five decimal
+places.
 
 ![straightness](results/straightness.png)
 
-You can see the same thing without any metric at all, just by plotting the paths:
+You can also just plot the paths and see it.
 
 ![integration paths](results/trajectories-8gaussians.png)
 
-Watching the same paths get drawn makes it plainer still:
+It's even easier to see when the paths are animated.
 
 ![particles carried from noise to the target](results/animation-8gaussians.gif)
 
 *Both panels start from the same noise sample and take the same 56 Euler steps
-on the same target, so the only thing that differs is the field doing the
-carrying: plain flow matching on the left, the same model after one round of
-reflow on the right.*
+toward the same target. Only the velocity field is different. The left one is
+plain flow matching, and the right one is the same model after one round of
+reflow.*
 
 ## What reflow actually does
 
 Plain conditional flow matching draws x0 from noise and x1 from data
 independently. Each pair gets a straight conditional path, but paths from
-different pairs cross, and at a crossing the model can only learn one velocity,
-so it learns the average of the two. Reflow fixes the coupling, not the model. Integrate the trained model from many noise samples, keep the (x0, x1)
-pairs it produced, retrain on those, and because x0 to x1 is now a function
-nothing crosses and nothing gets averaged away, which is what takes S on 8
+different pairs cross. At a crossing the model can only learn one velocity, so it
+learns the average of the two. Reflow leaves the model alone and changes the
+pairing. You integrate the trained model from lots of noise samples, keep the
+(x0, x1) pairs it produced, and retrain on those. Now x0 to x1 is a function, so
+no paths cross and nothing gets averaged away. That's what takes S on 8
 gaussians from 2.927 to 0.00099.
 
 ![learned velocity fields](results/velocity-field-8gaussians.png)
@@ -105,40 +107,39 @@ Full detail in [notes/METHODS.md](notes/METHODS.md#what-reflow-actually-does).
 
 ## The cost
 
-Reflow is not free and the tables above show the price if you look at the last
-row. At 128 NFE on 8 gaussians the reflowed model scores 0.112 against 0.117 for
-the model it was distilled from, both medians of 3 seeds. The reflowed number is
-the lower one, but the seeds run 0.107 to 0.176 for it and 0.110 to 0.181 for
-its teacher, so the two are level. Trained on its own
-teacher's outputs it cannot really pull ahead, and reflow ends up trading a
-ceiling for a floor.
+Reflow has a cost, and you can see it in the last row of the tables above. At
+128 NFE on 8 gaussians the reflowed model scores 0.112, and the model it was
+distilled from scores 0.117. Both are medians of 3 seeds. The reflowed number is
+lower, but the seeds run 0.107 to 0.176 for it and 0.110 to 0.181 for its teacher,
+so I'd call them level. Since it's trained on its own teacher's outputs, it can't
+really get ahead of it. In the end reflow gives up some of the ceiling to raise
+the floor.
 
 Full detail in [notes/METHODS.md](notes/METHODS.md#the-cost).
 
 ## Training
 
-The objective is a plain regression against the interpolant slope. No ELBO, no
-score function, no noise schedule. The loss curves are dull, and that is the
-point:
+Training is just a regression against the interpolant slope. There's no ELBO,
+score function or noise schedule. The loss curves are boring, which is what I
+wanted to see.
 
 ![training curves](results/training-curves.png)
 
-The run that drew them, every setting and seed with the line that set it, is
-the last entry in [notes/LOGBOOK.md](notes/LOGBOOK.md).
+The run that drew them is the last entry in [notes/LOGBOOK.md](notes/LOGBOOK.md),
+with every setting and seed and the line that set it.
 
 ## What I got wrong
 
-The diffusion control ran backwards for a whole experiment. I wrote `VPPath`
-using the convention from the diffusion papers, where t=0 is data and t=1 is
-noise, while `LinearPath` and every sampler in the repo use t=0 for noise. So the
-model learned a field pointing from data to noise and then got integrated the
-wrong way. Nothing crashed and nothing went NaN, it produced a plausible looking
-blob, and what gave it away was the sliced W2 getting worse with more compute,
-2.43 at 1 NFE against 2.84 at 128 in that broken run. The test I was missing was
-the obvious one, that t=0 is the noise end, and it now runs over every path
-class.
+My diffusion control ran backwards for a whole experiment. I wrote `VPPath` with
+the convention from the diffusion papers, where t=0 is data and t=1 is noise.
+`LinearPath` and every sampler in the repo use t=0 for noise. So the model learned
+a field pointing from data to noise and then got integrated the wrong way.
+Nothing crashed and nothing went NaN. It just made a plausible looking blob. What
+gave it away was the sliced W2 getting worse with more compute. In that broken
+run it was 2.43 at 1 NFE and 2.84 at 128. I was missing an obvious test, that
+t=0 is the noise end, and now it runs over every path class.
 
-The full post-mortem, including how long it took me to notice, is at
+I wrote up the whole thing, including how long it took me to notice, in
 [notes/METHODS.md](notes/METHODS.md#what-i-got-wrong).
 
 ## Running it
@@ -161,8 +162,8 @@ python -m bench.figures
 ```
 
 The experiment takes about 8 minutes on an M4 CPU and writes `results/*.csv` plus
-the model checkpoints. `bench.figures` reads those files and never re-runs an
-experiment, so a figure cannot disagree with a number in this README.
+the model checkpoints. `bench.figures` only reads those files and never re-runs
+an experiment, so a figure can't disagree with a number in this README.
 
 ## Layout
 
@@ -182,7 +183,7 @@ verify/             the same numbers recomputed in C, Rust, Java, Go, SQL and Ja
 
 ## Sources
 
-The papers this is built from, and what each one is actually for:
+These are the papers I built this from, and what I used each one for.
 
 - **Lipman, Chen, Ben-Hamu, Nickel, Le. Flow Matching for Generative Modeling. ICLR 2023.** [arXiv:2210.02747](https://arxiv.org/abs/2210.02747) The conditional flow matching objective, and the argument that you can regress against a conditional path and still get the right marginal field.
 - **Liu, Gong, Liu. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow. ICLR 2023.** [arXiv:2209.03003](https://arxiv.org/abs/2209.03003) Rectified flow and the reflow procedure. The crossing-paths argument in the section above is theirs.
@@ -195,11 +196,12 @@ Sliced Wasserstein as a distance between point clouds follows **Bonneel, Rabin, 
 
 ## Methodology
 
-Three entries in [`METHODOLOGY.md`](METHODOLOGY.md) earned their keep on this
-project in particular. Build the legible version first, or the VP control runs
-backwards for a week with nothing around to contradict it. Publish the seed
-spread, or the last row of the NFE table reads as a win when it is a tie. Leave
-the negative results in, or the section on what reflow costs never gets written.
+Three of the rules in [`METHODOLOGY.md`](METHODOLOGY.md) mattered a lot on this
+project. I build the simple, readable version first. Without it the VP control
+could have run backwards for a week with nothing to catch it. I publish the seed
+spread, otherwise the last row of the NFE table looks like a win when it's a tie.
+And I keep negative results in, which is why the section on what reflow costs
+exists.
 
 ## License
 
