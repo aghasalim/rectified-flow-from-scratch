@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.jpg" alt="Line drawing of two point clouds joined by tangled curved paths above and straight paths below" width="100%"></p>
+
 # One Euler step, if you straighten the paths first
 
 [![ci](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml/badge.svg)](https://github.com/aghasalim/rectified-flow-from-scratch/actions/workflows/ci.yml)
@@ -16,6 +18,24 @@ Everything below ran on my laptop CPU (Apple M4). The whole results table took
 the committed CSVs in `verify/`, using C, Java, Rust, Go, SQL, R and JavaScript.
 None of those can see the Python that made the numbers, and the build only goes
 green when they all agree.
+
+<details>
+<summary>Contents</summary>
+
+- [The one result](#the-one-result)
+- [Why it works, measured](#why-it-works-measured)
+- [What reflow actually does](#what-reflow-actually-does)
+- [The cost](#the-cost)
+- [Training](#training)
+- [What I got wrong](#what-i-got-wrong)
+- [Running it](#running-it)
+- [Layout](#layout)
+- [Sources](#sources)
+- [Methodology](#methodology)
+- [Citation](#citation)
+- [License](#license)
+
+</details>
 
 ## The one result
 
@@ -202,6 +222,21 @@ could have run backwards for a week with nothing to catch it. I publish the seed
 spread, otherwise the last row of the NFE table looks like a win when it's a tie.
 And I keep negative results in, which is why the section on what reflow costs
 exists.
+
+## Citation
+
+If you use this work, please cite it. The same record is in [`CITATION.cff`](CITATION.cff).
+
+```bibtex
+@software{mustafazada2026rectifiedflowfromscratch,
+  author  = {Mustafazada, Aghasalim},
+  title   = {Rectified Flow from scratch},
+  year    = {2026},
+  version = {1.0.1},
+  doi     = {10.5281/zenodo.23003668},
+  url     = {https://github.com/aghasalim/rectified-flow-from-scratch}
+}
+```
 
 ## License
 
